@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}归档 · {{ SITE_TITLE }}{% endblock %}
+{% block content %}
+<h1>历史归档</h1>
+<p class="muted">累计 {{ total }} 篇 · 按年份与抓取周期归档</p>
+{% for year, batches in years.items() %}
+<details class="archive-year"{% if loop.first %} open{% endif %}>
+  <summary>{{ year }} 年（{{ batches|length }} 期）</summary>
+  <div class="year-weeks">
+    {% for b in batches %}
+    <a class="archive-week" href="{{ BASE }}/weeks/{{ b.end }}/index.html">
+      <span class="win">{{ b.start }} ~ {{ b.end }}</span>
+      <span class="count">{{ b.papers|length }} 篇</span>
+      <span class="arrow">→</span>
+    </a>
+    {% endfor %}
+  </div>
+</details>
+{% endfor %}
+{% endblock %}

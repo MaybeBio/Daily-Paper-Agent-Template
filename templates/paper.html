@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ paper.title }} · {{ SITE_TITLE }}{% endblock %}
+{% block content %}
+<article class="paper">
+  <div class="paper-head">
+    <span class="score score-{{ score_tier(paper.score) }}">{{ paper.score if paper.score is not none else "-" }}</span>
+    <div>
+      <h1>{{ paper.title }}</h1>
+      <div class="meta">{{ paper.authors }}</div>
+      <div class="meta muted">
+        {% set sl = source_label(paper.source, paper.journal) %}
+        <span class="journal">{{ sl.venue }}</span>{% if sl.kind == "preprint" %} <span class="preprint-badge">预印本</span>{% endif %}
+        · {{ paper.published_date[:10] }}
+        {% if paper.has_fulltext %} · 全文({{ paper.fulltext_source }}){% else %} · 仅摘要{% endif %}
+        {% if paper.url %} · <a href="{{ paper.url }}">原文</a>{% endif %}
+      </div>
+      {% if paper.one_liner_zh %}<p class="one-liner">{{ paper.one_liner_zh }}</p>{% endif %}
+    </div>
+  </div>
+  {% if paper.abstract %}
+  <section>
+    <h2>摘要</h2>
+    <div class="md">{{ paper.abstract }}</div>
+  </section>
+  {% endif %}
+  {% if paper.abstract_zh %}
+  <section>
+    <h2>摘要翻译</h2>
+    <div class="md">{{ paper.abstract_zh }}</div>
+  </section>
+  {% endif %}
+  {% if card_html %}
+  <section>
+    <h2>Paper Card</h2>
+    <div class="md">{{ card_html | safe }}</div>
+  </section>
+  {% endif %}
+  {% if review_html %}
+  <section>
+    <h2>审稿人评审</h2>
+    <div class="md">{{ review_html | safe }}</div>
+  </section>
+  {% endif %}
+</article>
+{% endblock %}

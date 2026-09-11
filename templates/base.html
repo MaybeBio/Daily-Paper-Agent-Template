@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ SITE_TITLE }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ BASE }}/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ BASE }}/">{{ SITE_TITLE }}</a>
+    <nav>
+      <a href="{{ BASE }}/">本周</a>
+      <a href="{{ BASE }}/archive.html">归档</a>
+      <a href="{{ BASE }}/search.html">搜索</a>
+    </nav>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>

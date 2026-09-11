@@ -1,0 +1,14 @@
+<a class="paper-card" href="{{ BASE }}/{{ p.paper_page_path }}">
+  <div class="paper-number">{{ card_index }}</div>
+  <div class="paper-card-main">
+    <div class="paper-meta">
+      {% set sl = source_label(p.source, p.journal) %}
+      <span class="journal">{{ sl.venue }}</span>
+      {% if sl.kind == "preprint" %}<span class="preprint-badge">预印本</span>{% endif %}
+      <span>{{ p.published_date[:10] }}</span>
+      <span class="score score-{{ score_tier(p.score) }}">{{ p.score if p.score is not none else "-" }}</span>
+    </div>
+    <h2>{{ p.title }}</h2>
+    <p class="card-summary">{{ p.one_liner_zh }}</p>
+  </div>
+</a>

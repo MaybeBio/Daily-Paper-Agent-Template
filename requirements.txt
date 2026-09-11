@@ -1,0 +1,9 @@
+pyPaperFlow
+pandas
+PyYAML
+httpx
+openai
+jinja2
+markdown
+# 测试（可选，仅跑 tests/ 需要）
+pytest
