@@ -39,7 +39,7 @@
 | 步骤 | 你要做的 | 具体内容 |
 |---|---|---|
 | **1 · 换领域** | 编辑 [`config.yaml`](./config.yaml) 与 [`prompts.yaml`](./prompts.yaml) | 改检索式与命名、换 4 个 prompt 的领域措辞，具体见下方「换课题（最终操作）」 |
-| **2 · 设定时与密钥** | 配置 [`workflow`](./.github/workflows/monitor.yml) 与 Secrets | 确认 `monitor.yml` 的 cron；在 **Settings → Secrets and variables → Actions** 添加 `ENTREZ_EMAIL`（必填）、`NCBI_API_KEY`（可选）与 `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL`（AI 必填） |
+| **2 · 设定时与密钥** | 配置 [`workflow`](./.github/workflows/monitor.yml)、Secrets 与 Pages | 确认 `monitor.yml` 的 cron；在 **Settings → Secrets and variables → Actions** 添加 `ENTREZ_EMAIL`（必填）、`NCBI_API_KEY`（可选）与 `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL`（AI 必填）；并在 **Settings → Pages** 启用 Pages（来源选 GitHub Actions） |
 | **3 · 每周收报** | 等待或手动触发 actions | 有新文献时自动开一条 **Issue 周报**，同时更新 **GitHub Pages 站点**：按相关度评分排序，逐篇可读摘要翻译、16 节 Paper Card 与审稿人评审，并支持全文检索 |
 
 ### 🔄 换课题（最终操作）
@@ -48,7 +48,8 @@
 2. 改 `config.yaml`：`topic`、`title`、`site_base_url`、`platforms.*.query`
 3. 改 `prompts.yaml`：4 个 prompt 里与领域相关的措辞
 4. 配 Secrets：`ENTREZ_EMAIL`、`LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL`
-5. 手动 `workflow_dispatch` 跑一次验证
+5. **先启用 Pages**：**Settings → Pages** 把来源设为 **GitHub Actions**（不启用则站点不会部署）
+6. 手动 `workflow_dispatch` 跑一次验证
 
 > 推送到 `main` 后也可在仓库 **Actions** 页手动触发试跑；想先本地验证见「本地运行与调试」。
 
@@ -195,7 +196,7 @@ PubMed 与 LLM 凭据一律走环境变量，**不写入仓库**：
 - 本地：`export ENTREZ_EMAIL=you@example.com` 等。
 - GitHub Actions：**Settings → Secrets and variables → Actions → Repository secrets / Variables** 新建对应项，workflow 以 `${{ secrets.* }}` / `${{ vars.* }}` 注入。
 
-推送周期在 `monitor.yml` 的 `schedule.cron`（默认**周一 09:23 UTC**，避开整点）；workflow 权限为 `contents: write` + `issues: write`：跑完 commit+push 产物，再按是否命中决定开 Issue。站点部署由 `deploy_pages.yml` 监听 monitor 成功后自动触发，需在仓库 **Settings → Pages** 把来源设为 **GitHub Actions**。
+推送周期在 `monitor.yml` 的 `schedule.cron`（默认**周一 09:23 UTC**，避开整点）；workflow 权限为 `contents: write` + `issues: write`：跑完 commit+push 产物，再按是否命中决定开 Issue。站点部署由 `deploy_pages.yml` 监听 monitor 成功后自动触发，**需先在仓库 Settings → Pages 启用 Pages**（来源设为 **GitHub Actions**），否则 `deploy_pages.yml` 会因 Pages 未开启而失败。
 
 > **模型选型提示：** 评分阶段走 `response_format={"type":"json_object"}`，所选模型必须支持 JSON mode（如 DeepSeek 的 `deepseek-reasoner` 通常不支持，不能直接替换）；评分/翻译要忠实、不宜用思考/推理模式；卡片/评审单次输出达 16k / 12k token，需留意网关超时与 token 成本。
 
