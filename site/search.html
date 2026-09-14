@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>搜索 · 无序蛋白互作 × AI</title>
+  <link rel="stylesheet" href="/Daily-Paper-idp-interaction-ai/assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/Daily-Paper-idp-interaction-ai/">无序蛋白互作 × AI</a>
+    <nav>
+      <a href="/Daily-Paper-idp-interaction-ai/">本周</a>
+      <a href="/Daily-Paper-idp-interaction-ai/archive.html">归档</a>
+      <a href="/Daily-Paper-idp-interaction-ai/search.html">搜索</a>
+    </nav>
+  </header>
+  <main>
+<div class="search-page" data-search-root data-index-url="/Daily-Paper-idp-interaction-ai/data/search.json" data-deep-index-url="/Daily-Paper-idp-interaction-ai/data/search-deep.json">
+  <h1>搜索</h1>
+  <p class="muted">默认检索标题、作者、摘要；勾选「深度搜索」后含 Paper Card 与 Review</p>
+  <form class="search-form" role="search">
+    <div class="search-input-row">
+      <input id="search-query" name="q" type="search" maxlength="200"
+             placeholder="如 molecular dynamics、相分离、intrinsically disordered"
+             autocomplete="off" spellcheck="false"/>
+      <button type="submit" class="search-submit" id="search-submit">搜索</button>
+    </div>
+    <label class="search-deep-toggle">
+      <input type="checkbox" id="search-deep" />
+      深度搜索（含 Paper Card / Review）
+    </label>
+  </form>
+  <p class="search-status" id="search-status" role="status" aria-live="polite">输入关键词开始搜索</p>
+  <section id="search-results" aria-label="搜索结果"></section>
+  <div class="search-empty" id="search-empty" hidden>
+    <p>没有找到匹配项。试试更短的关键词，或减少同时搜索的词。</p>
+    <p id="search-deep-hint" hidden>也可以在 Paper Card / Review 中查找：勾选上方「深度搜索」。</p>
+  </div>
+  <button type="button" class="search-more" id="search-more" hidden>显示更多结果</button>
+</div>
+<script src="/Daily-Paper-idp-interaction-ai/assets/search.js"></script>
+</main>
+</body>
+</html>

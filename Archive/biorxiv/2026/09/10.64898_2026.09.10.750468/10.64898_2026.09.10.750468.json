@@ -1,0 +1,175 @@
+{
+  "source": "biorxiv",
+  "source_id": "10.64898/2026.09.10.750468",
+  "title": "A new class of inherently efficient SUMOylation substrates",
+  "doi": "10.64898/2026.09.10.750468",
+  "abstract": "SUMOylation is an essential eukaryotic ubiquitin-like post-translational modification that plays a central role in the regulation of various nuclear processes and stress responses. It canonically occurs at lysine residues within ΨKXE consensus motifs that lie in intrinsically disordered regions or loops and interact specifically with the SUMO-conjugating E2 enzyme UBC9. However, many detected SUMOylation sites are found within structured domains, and it remains unclear how these are recognised by UBC9. Here, we investigated the SUMOylation of Lys43 in the BTB domain of human ZBTB38 (ZBTB38BTB), a lysine located within a rigid β-sheet. By combining X-ray crystallography, structural prediction, and in-vitro UBC9 interaction and SUMOylation assays, we show that ZBTB38BTB possesses a dedicated surface that recapitulates the spatial arrangement of residues found in canonical linear consensus motifs. This surface binds UBC9 with mid-micromolar affinity and is predicted to position Lys43 in its active site for efficient SUMOylation. Structural modelling and sequence analyses suggest that this property is shared by BTB domains of five members (10%) of the ZBTB-protein family across vertebrates, revealing a previously unrecognised property of a subset of ZBTBBTB domains. Kinetic analyses reveal that, under the reaction conditions used, the catalytic efficiency of ZBTB38BTB and ZBTB33BTB SUMOylation are closely comparable to that of the C-terminal domain of RANGAP1, the best-characterised and most efficiently SUMOylated substrate known. This defines a new class of inherently efficient, E3 ligase-independent SUMOylation substrates beyond RANGAP1 and suggests that structural pre-organisation of the acceptor lysine and its environment may promote productive UBC9 engagement. Lastly, we demonstrate the presence of higher-molecular-weight, modified forms of ZBTB38 in human cells, consistent with SUMOylation. Together, these results provide a biochemical basis for interpreting existing and designing future studies on the functional impact of ZBTB SUMOylation. More broadly, our findings offer insights into the determinants of efficient SUMOylation, and may facilitate the identification of further inherently efficient targets, and, potentially, the design of SUMOylation modulators.",
+  "authors": [
+    "Cisse EH",
+    "Visticot L",
+    "Cepa R",
+    "Mishra A",
+    "Coste F",
+    "Goffinont S",
+    "Mance L",
+    "Battault S",
+    "Guigneau D",
+    "Talhaoui I",
+    "Castaing B",
+    "Aucagne V",
+    "Defossez P",
+    "Suskiewicz MJ"
+  ],
+  "published_date": "2026-09-13",
+  "updated_date": "",
+  "journal": "bioRxiv",
+  "category": "",
+  "landing_url": "https://www.biorxiv.org/content/10.64898/2026.09.10.750468",
+  "pdf_url": "https://www.biorxiv.org/content/10.64898/2026.09.10.750468.full.pdf",
+  "pdf_path": "",
+  "pdf_downloaded": false,
+  "query": "(\"intrinsically disordered protein\" OR \"intrinsically disordered region\" OR \"intrinsically disordered\" OR \"disordered protein\" OR \"natively unfolded\" OR \"unstructured protein\" OR \"biomolecular condensate\") AND (\"protein-protein interaction\" OR interaction OR interact OR bind OR complex OR partner OR interface) AND (\"deep learning\" OR \"machine learning\" OR \"neural network\" OR \"graph neural network\" OR \"language model\" OR transformer OR \"diffusion model\" OR generative OR \"flow matching\" OR \"molecular dynamics\" OR simulation OR docking OR \"binding affinity\" OR prediction OR alphafold OR esmfold OR rosetta)",
+  "version": "",
+  "keywords": [],
+  "extra": {
+    "provider": "europepmc",
+    "epmc_id": "PPR1318418",
+    "raw_record": {
+      "id": "PPR1318418",
+      "source": "PPR",
+      "doi": "10.64898/2026.09.10.750468",
+      "title": "A new class of inherently efficient SUMOylation substrates",
+      "authorString": "Cisse EH, Visticot L, Cepa R, Mishra A, Coste F, Goffinont S, Mance L, Battault S, Guigneau D, Talhaoui I, Castaing B, Aucagne V, Defossez P, Suskiewicz MJ.",
+      "authorList": {
+        "author": [
+          {
+            "fullName": "Cisse EH",
+            "firstName": "El Hadji",
+            "lastName": "Cisse",
+            "initials": "EH"
+          },
+          {
+            "fullName": "Visticot L",
+            "firstName": "Laura",
+            "lastName": "Visticot",
+            "initials": "L"
+          },
+          {
+            "fullName": "Cepa R",
+            "firstName": "Rafael",
+            "lastName": "Cepa",
+            "initials": "R"
+          },
+          {
+            "fullName": "Mishra A",
+            "firstName": "Aanchal",
+            "lastName": "Mishra",
+            "initials": "A"
+          },
+          {
+            "fullName": "Coste F",
+            "firstName": "Franck",
+            "lastName": "Coste",
+            "initials": "F"
+          },
+          {
+            "fullName": "Goffinont S",
+            "firstName": "Stephane",
+            "lastName": "Goffinont",
+            "initials": "S"
+          },
+          {
+            "fullName": "Mance L",
+            "firstName": "Lucija",
+            "lastName": "Mance",
+            "initials": "L"
+          },
+          {
+            "fullName": "Battault S",
+            "firstName": "Sarah",
+            "lastName": "Battault",
+            "initials": "S"
+          },
+          {
+            "fullName": "Guigneau D",
+            "firstName": "Dorian",
+            "lastName": "Guigneau",
+            "initials": "D"
+          },
+          {
+            "fullName": "Talhaoui I",
+            "firstName": "Ibtissam",
+            "lastName": "Talhaoui",
+            "initials": "I"
+          },
+          {
+            "fullName": "Castaing B",
+            "firstName": "Bertrand",
+            "lastName": "Castaing",
+            "initials": "B"
+          },
+          {
+            "fullName": "Aucagne V",
+            "firstName": "Vincent",
+            "lastName": "Aucagne",
+            "initials": "V"
+          },
+          {
+            "fullName": "Defossez P",
+            "firstName": "Pierre-Antoine",
+            "lastName": "Defossez",
+            "initials": "P"
+          },
+          {
+            "fullName": "Suskiewicz MJ",
+            "firstName": "Marcin Jozef",
+            "lastName": "Suskiewicz",
+            "initials": "MJ"
+          }
+        ]
+      },
+      "pubYear": "2026",
+      "abstractText": "SUMOylation is an essential eukaryotic ubiquitin-like post-translational modification that plays a central role in the regulation of various nuclear processes and stress responses. It canonically occurs at lysine residues within ΨKXE consensus motifs that lie in intrinsically disordered regions or loops and interact specifically with the SUMO-conjugating E2 enzyme UBC9. However, many detected SUMOylation sites are found within structured domains, and it remains unclear how these are recognised by UBC9. Here, we investigated the SUMOylation of Lys43 in the BTB domain of human ZBTB38 (ZBTB38BTB), a lysine located within a rigid β-sheet. By combining X-ray crystallography, structural prediction, and in-vitro UBC9 interaction and SUMOylation assays, we show that ZBTB38BTB possesses a dedicated surface that recapitulates the spatial arrangement of residues found in canonical linear consensus motifs. This surface binds UBC9 with mid-micromolar affinity and is predicted to position Lys43 in its active site for efficient SUMOylation. Structural modelling and sequence analyses suggest that this property is shared by BTB domains of five members (10%) of the ZBTB-protein family across vertebrates, revealing a previously unrecognised property of a subset of ZBTBBTB domains. Kinetic analyses reveal that, under the reaction conditions used, the catalytic efficiency of ZBTB38BTB and ZBTB33BTB SUMOylation are closely comparable to that of the C-terminal domain of RANGAP1, the best-characterised and most efficiently SUMOylated substrate known. This defines a new class of inherently efficient, E3 ligase-independent SUMOylation substrates beyond RANGAP1 and suggests that structural pre-organisation of the acceptor lysine and its environment may promote productive UBC9 engagement. Lastly, we demonstrate the presence of higher-molecular-weight, modified forms of ZBTB38 in human cells, consistent with SUMOylation. Together, these results provide a biochemical basis for interpreting existing and designing future studies on the functional impact of ZBTB SUMOylation. More broadly, our findings offer insights into the determinants of efficient SUMOylation, and may facilitate the identification of further inherently efficient targets, and, potentially, the design of SUMOylation modulators.",
+      "pubTypeList": {
+        "pubType": [
+          "Preprint"
+        ]
+      },
+      "bookOrReportDetails": {
+        "publisher": "bioRxiv",
+        "yearOfPublication": 2026
+      },
+      "fullTextUrlList": {
+        "fullTextUrl": [
+          {
+            "availability": "Free",
+            "availabilityCode": "F",
+            "documentStyle": "doi",
+            "site": "DOI",
+            "url": "https://doi.org/10.64898/2026.09.10.750468"
+          }
+        ]
+      },
+      "isOpenAccess": "N",
+      "inEPMC": "N",
+      "inPMC": "N",
+      "hasPDF": "N",
+      "hasBook": "N",
+      "hasSuppl": "N",
+      "citedByCount": 0,
+      "hasData": "N",
+      "hasReferences": "N",
+      "hasTextMinedTerms": "N",
+      "hasDbCrossReferences": "N",
+      "hasLabsLinks": "N",
+      "hasEvaluations": "N",
+      "authMan": "N",
+      "epmcAuthMan": "N",
+      "nihAuthMan": "N",
+      "hasTMAccessionNumbers": "N",
+      "dateOfCreation": "2026-09-14",
+      "firstIndexDate": "2026-09-14",
+      "firstPublicationDate": "2026-09-13"
+    }
+  }
+}

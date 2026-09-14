@@ -1,0 +1,237 @@
+{
+  "source": "biorxiv",
+  "source_id": "10.64898/2026.09.10.750412",
+  "title": "Agentic-AI-ready genome-wide poxvirus-host interaction screen refined by a protein language model",
+  "doi": "10.64898/2026.09.10.750412",
+  "abstract": "Recent mpox outbreaks highlight the necessity to understand the interactions between poxviruses and the human host. These can be discovered systematically through screening for host genes involved in infection at the single-cell level using RNA interference. However, off-target effects and assay noise obscure true gene-phenotype relationships, hampering the discovery of therapeutically relevant targets. Here, we show that integrating protein-protein interaction information derived from a protein language model boosts the discovery of vaccinia virus-host interactions. We propose ICARus - a positive-unlabelled read-out refinement framework to achieve this. Our approach enhances the identification of human genes with potential antiviral function. We provide the raw and refined read-outs of a genome-wide screen for vaccinia virus host factors as an agentic-AI-enabled community resource. Our findings provide a generalisable strategy for robust hit prioritisation in functional screens, accelerating discovery across complex biological systems.",
+  "authors": [
+    "Jacob Anter",
+    "Jason Mercer",
+    "Artur Yakimovich"
+  ],
+  "published_date": "2026-09-13",
+  "updated_date": "2026-09-13T13:00:13Z",
+  "journal": "bioRxiv",
+  "category": "Systems Biology",
+  "landing_url": "https://www.biorxiv.org/content/10.64898/2026.09.10.750412",
+  "pdf_url": "https://www.biorxiv.org/content/10.64898/2026.09.10.750412.full.pdf",
+  "pdf_path": "",
+  "pdf_downloaded": false,
+  "query": "(\"intrinsically disordered protein\" OR \"intrinsically disordered region\" OR \"intrinsically disordered\" OR \"disordered protein\" OR \"natively unfolded\" OR \"unstructured protein\" OR \"biomolecular condensate\") AND (\"protein-protein interaction\" OR interaction OR interact OR bind OR complex OR partner OR interface) AND (\"deep learning\" OR \"machine learning\" OR \"neural network\" OR \"graph neural network\" OR \"language model\" OR transformer OR \"diffusion model\" OR generative OR \"flow matching\" OR \"molecular dynamics\" OR simulation OR docking OR \"binding affinity\" OR prediction OR alphafold OR esmfold OR rosetta)",
+  "version": "",
+  "keywords": [
+    "Systems Biology"
+  ],
+  "extra": {
+    "publisher": "openRxiv",
+    "prefix": "10.64898",
+    "type": "posted-content",
+    "group_title": "Systems Biology",
+    "raw_record": {
+      "institution": [
+        {
+          "name": "bioRxiv"
+        }
+      ],
+      "indexed": {
+        "date-parts": [
+          [
+            2026,
+            9,
+            13
+          ]
+        ],
+        "date-time": "2026-09-13T13:04:34Z",
+        "timestamp": 1789304674173,
+        "version": "build-2803163510"
+      },
+      "posted": {
+        "date-parts": [
+          [
+            2026,
+            9,
+            13
+          ]
+        ]
+      },
+      "group-title": "Systems Biology",
+      "reference-count": 0,
+      "publisher": "openRxiv",
+      "license": [
+        {
+          "start": {
+            "date-parts": [
+              [
+                2026,
+                9,
+                13
+              ]
+            ],
+            "date-time": "2026-09-13T00:00:00Z",
+            "timestamp": 1789257600000
+          },
+          "content-version": "vor",
+          "delay-in-days": 0,
+          "URL": "http://creativecommons.org/licenses/by-nc/4.0/"
+        }
+      ],
+      "funder": [
+        {
+          "award": [
+            "CASUS"
+          ],
+          "award-info": [
+            {
+              "award-number": [
+                "CASUS"
+              ]
+            }
+          ],
+          "id": [
+            {
+              "id": "https://ror.org/04pz7b180",
+              "id-type": "ROR",
+              "asserted-by": "publisher"
+            }
+          ]
+        }
+      ],
+      "content-domain": {
+        "domain": [],
+        "crossmark-restriction": false
+      },
+      "accepted": {
+        "date-parts": [
+          [
+            2026,
+            9,
+            13
+          ]
+        ]
+      },
+      "abstract": "<jats:p>Recent mpox outbreaks highlight the necessity to understand the interactions between poxviruses and the human host. These can be discovered systematically through screening for host genes involved in infection at the single-cell level using RNA interference. However, off-target effects and assay noise obscure true gene-phenotype relationships, hampering the discovery of therapeutically relevant targets. Here, we show that integrating protein-protein interaction information derived from a protein language model boosts the discovery of vaccinia virus-host interactions. We propose ICARus - a positive-unlabelled read-out refinement framework to achieve this. Our approach enhances the identification of human genes with potential antiviral function. We provide the raw and refined read-outs of a genome-wide screen for vaccinia virus host factors as an agentic-AI-enabled community resource. Our findings provide a generalisable strategy for robust hit prioritisation in functional screens, accelerating discovery across complex biological systems.</jats:p>",
+      "DOI": "10.64898/2026.09.10.750412",
+      "type": "posted-content",
+      "created": {
+        "date-parts": [
+          [
+            2026,
+            9,
+            13
+          ]
+        ],
+        "date-time": "2026-09-13T13:00:13Z",
+        "timestamp": 1789304413000
+      },
+      "source": "Crossref",
+      "is-referenced-by-count": 0,
+      "title": [
+        "Agentic-AI-ready genome-wide poxvirus-host interaction screen refined by a protein language model"
+      ],
+      "prefix": "10.64898",
+      "author": [
+        {
+          "ORCID": "https://orcid.org/0009-0006-4897-7744",
+          "authenticated-orcid": false,
+          "given": "Jacob",
+          "family": "Anter",
+          "sequence": "first",
+          "affiliation": [
+            {
+              "name": "Helmholtz Center Dresden-Rossendorf;"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0000-0003-1466-9541",
+          "authenticated-orcid": false,
+          "given": "Jason",
+          "family": "Mercer",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Institute of Microbiology and Infection, University of Birmingham"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "ORCID": "https://orcid.org/0000-0003-2458-4904",
+          "authenticated-orcid": false,
+          "given": "Artur",
+          "family": "Yakimovich",
+          "sequence": "additional",
+          "affiliation": [
+            {
+              "name": "Helmholtz Center Dresden-Rossendorf;"
+            }
+          ],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "member": "54368",
+      "link": [
+        {
+          "URL": "https://syndication.highwire.org/content/doi/10.64898/2026.09.10.750412",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "deposited": {
+        "date-parts": [
+          [
+            2026,
+            9,
+            13
+          ]
+        ],
+        "date-time": "2026-09-13T13:00:13Z",
+        "timestamp": 1789304413000
+      },
+      "score": 54.320034,
+      "resource": {
+        "primary": {
+          "URL": "http://biorxiv.org/lookup/doi/10.64898/2026.09.10.750412"
+        }
+      },
+      "issued": {
+        "date-parts": [
+          [
+            2026,
+            9,
+            13
+          ]
+        ]
+      },
+      "references-count": 0,
+      "URL": "https://doi.org/10.64898/2026.09.10.750412",
+      "published": {
+        "date-parts": [
+          [
+            2026,
+            9,
+            13
+          ]
+        ]
+      },
+      "subtype": "preprint"
+    }
+  }
+}
