@@ -112,6 +112,7 @@ source, id, doi, title, authors, journal, published_date, url, abstract
 .
 ├── scripts/
 │   ├── monitor.py                   # 主脚本：读 config → 逐平台检索 → 落盘 → 生成 Issue → 触发 LLM 流水线
+│   ├── backfill.py                  # 历史回填：按周驱动 monitor.py 补齐过去各周（前置探活 + 断点续跑）
 │   ├── agent.py                     # LLM 层：OpenAI 兼容客户端 + 评分/翻译/Paper Card/评审 四个生成函数
 │   ├── fulltext.py                  # 全文获取封装：优先原生全文，失败回落摘要
 │   └── build_site.py                # 静态站点生成：遍历 Archive/ 渲染 Jinja2 模板
@@ -176,7 +177,7 @@ LLM 调用以网关 IO 等待为主，用线程池并发（`llm.concurrency`，�
 
 - **PubMed** —— `(对象) AND (方法)` 括号两段式；Mesh 受标引时滞影响，周窗召回主要靠 `[tiab]` 精确词；`[edat]` 时间窗由代码自动拼接。
 - **arXiv** —— 布尔项须写成 `all:"phrase"` / `all:word`，裸词会被强 AND、OR 失效；建议设 `max_results` 上限，否则会翻整周全部命中导致限速挂起。
-- **bioRxiv / medRxiv** —— 同一检索器（Europe PMC + Crossref 超集）。**必须保留括号两段式，不可拍平成无括号 DNF**——Europe PMC（Lucene）会把无括号 AND/OR 混排错乱。
+- **bioRxiv / medRxiv** —— 同一检索器（Europe PMC + Crossref 超集）。**必须保留括号两段式，不可拍平成无括号 DNF**——Europe PMC（Lucene）会把无括号 AND/OR 混排错乱。Europe PMC 不可达时自动降级为纯 Crossref 检索（丢失仅出现在全文里的词命中），monitor 在 stderr 打 `DEGRADED` 告警，backfill 据此把该周标为需重跑。
 - **chemRxiv** —— 仅 Crossref 收录（Europe PMC 不覆盖），是唯一无严格索引的平台，接受一定噪声，交给 Zotero 兜底。
 
 ---
@@ -227,6 +228,33 @@ python scripts/build_site.py \
 | `--run-date 2026-09-03` | 固定运行日，便于回测某周 |
 
 窗口默认不含运行当天；单平台失败仅告警，全部失败才非零退出。
+
+### 📥 历史回填（backfill）
+
+新建仓库后想补齐**过去各周**的文献（而不是只从今天往前 `window_days`），用 `scripts/backfill.py` 按周驱动 `monitor.py` 逐周回填：
+
+```bash
+export ENTREZ_EMAIL=... LLM_BASE_URL=... LLM_API_KEY=...   # 与 monitor 相同的环境变量
+
+# 1) 先 dry-run 看周计划：--since/--until 之间每个周一各跑一次，窗口 = 该周一往前 7 天
+python scripts/backfill.py --since 2025-09-15 --until 2026-09-14 --dry-run
+
+# 2) 正式回填
+python scripts/backfill.py --since 2025-09-15 --until 2026-09-14
+```
+
+要点：
+
+- **为什么按周**：`--since/--until` 之间每个周一拆成独立一次 `monitor.py` 运行（`--window-days 7`），避免多年窗口撞上 PubMed `retmax=500` / arXiv `max_results` 截断，也保证老论文按自身所在周归档。
+- **前置探活**：正式跑之前先并行探测 NCBI / Europe PMC / arXiv / LLM 网关，任一不通就拒绝开始（fresh tmux 里常漏代理，脚本会提示检查 `http_proxy` / `https_proxy`）。
+- **断点续跑**：某周崩溃或「平台缺失 / 降级」时脚本非零退出并列出该周，用打印出的重试命令只补那一周，不必整段重跑（重复某周会连同其 LLM 工作一并重跑）。
+- **跑完手动部署 Pages**：回填只提交 `Archive/`，不提交 `site/`（已 gitignore）。跑完后重建站点并手动触发一次部署：
+
+```bash
+python scripts/build_site.py --out-dir . --config config.yaml
+git add Archive/ Discovery/ && git commit -m "backfill: capture <范围>" && git push
+# 再到仓库 Actions → deploy_pages.yml → Run workflow 手动触发
+```
 
 **测试：** `tests/` 是 pytest 自检用例（不参与部署，可安全删除）。`pip install pytest && pytest` 即可。
 
