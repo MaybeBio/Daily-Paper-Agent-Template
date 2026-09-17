@@ -269,6 +269,26 @@ git add Archive/ Discovery/ && git commit -m "backfill: capture <范围>" && git
 
 ---
 
+## 🌸 展示效果
+
+> `Issue提醒：assign给你`
+
+![alt text](figs/image1.png)
+
+![alt text](figs/image2.png)
+
+> `网页部署：依次为周推送 - > 站点沉淀 - > 可全文搜索`
+
+![alt text](figs/image.png)
+
+![alt text](figs/image3.png)
+
+![alt text](figs/image4.png)
+
+> `文献WIKI积淀：仓库即WIKI理念，你可以畅所使用LLM WIKI/RAG技术来消化你的文献仓库！`
+
+---
+
 <details>
 <summary><b>❓ 常见问题</b></summary>
 
