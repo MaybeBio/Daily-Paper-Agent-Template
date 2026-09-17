@@ -4,4 +4,8 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .superpowers/
-CLAUDE.md 
+CLAUDE.md
+
+# site/ is a pure re-render of Archive/ (scripts/build_site.py) and is rebuilt in
+# CI before publishing — committing it would duplicate the whole site every week.
+site/

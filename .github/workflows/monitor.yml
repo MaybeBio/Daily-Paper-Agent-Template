@@ -24,10 +24,10 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -r requirements.txt
-      - name: monitor + agent + site
-        run: |
-          python scripts/monitor.py --config config.yaml --out-dir . --issue-body /tmp/issue.md --issue-title /tmp/issue.title
-          python scripts/build_site.py --out-dir . --config config.yaml
+      # site/ is gitignored; deploy_pages.yml rebuilds it from Archive/ before
+      # publishing, so this job only produces what it commits.
+      - name: monitor + agent
+        run: python scripts/monitor.py --config config.yaml --out-dir . --issue-body /tmp/issue.md --issue-title /tmp/issue.title
         env:
           ENTREZ_EMAIL: ${{ secrets.ENTREZ_EMAIL }}
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
