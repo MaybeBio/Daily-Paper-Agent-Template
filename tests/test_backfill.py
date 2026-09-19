@@ -41,6 +41,16 @@ def test_week_args_never_asks_for_an_issue():
     assert "--issue-title" not in args
 
 
+def test_week_args_omits_platforms_by_default():
+    args = backfill.week_args("2026-09-14", "config.yaml", ".")
+    assert "--platforms" not in args
+
+
+def test_week_args_passes_platforms_through():
+    args = backfill.week_args("2026-09-14", "config.yaml", ".", "arxiv")
+    assert args[args.index("--platforms") + 1] == "arxiv"
+
+
 def test_missing_env_lists_absent_vars(monkeypatch):
     monkeypatch.delenv("ENTREZ_EMAIL", raising=False)
     monkeypatch.delenv("LLM_API_KEY", raising=False)
@@ -51,6 +61,18 @@ def test_missing_env_ignores_blank_values(monkeypatch):
     monkeypatch.setenv("ENTREZ_EMAIL", "  ")
     monkeypatch.setenv("LLM_API_KEY", "sk-x")
     assert backfill.missing_env() == ["ENTREZ_EMAIL"]
+
+
+def test_missing_env_skips_entrez_email_for_arxiv_only(monkeypatch):
+    monkeypatch.delenv("ENTREZ_EMAIL", raising=False)
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    assert backfill.missing_env(["arxiv"]) == ["LLM_API_KEY"]
+
+
+def test_missing_env_requires_entrez_email_for_pubmed(monkeypatch):
+    monkeypatch.delenv("ENTREZ_EMAIL", raising=False)
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    assert backfill.missing_env(["pubmed"]) == ["ENTREZ_EMAIL", "LLM_API_KEY"]
 
 
 def test_week_failures_reads_platforms_from_the_summary_line():
@@ -132,8 +154,8 @@ def test_week_degradations_parses_monitors_own_summary_line():
     assert backfill.week_degradations(line + "\n") == ["biorxiv"]
 
 
-def _labels():
-    return [label for label, _, _ in backfill.probe_targets()]
+def _labels(platforms=None):
+    return [label for label, _, _ in backfill.probe_targets(platforms)]
 
 
 def test_probe_targets_covers_every_external_service(monkeypatch):
@@ -154,6 +176,11 @@ def test_probe_targets_falls_back_to_the_openai_default(monkeypatch):
     monkeypatch.setenv("LLM_API_KEY", "sk-x")
     monkeypatch.delenv("LLM_BASE_URL", raising=False)
     assert backfill.probe_targets()[-1][1] == "https://api.openai.com/v1/models"
+
+
+def test_probe_targets_filters_to_arxiv_plus_llm(monkeypatch):
+    monkeypatch.setenv("LLM_API_KEY", "sk-x")
+    assert _labels(["arxiv"]) == ["arXiv", "LLM gateway"]
 
 
 class _FakeResponse:

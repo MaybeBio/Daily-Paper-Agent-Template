@@ -29,7 +29,6 @@ import httpx
 HERE = os.path.dirname(os.path.abspath(__file__))
 MONITOR = os.path.join(HERE, "monitor.py")
 WINDOW_DAYS = 7
-REQUIRED_ENV = ("ENTREZ_EMAIL", "LLM_API_KEY")
 RETRY_CMD = "python scripts/backfill.py"
 PREFLIGHT_TIMEOUT = 15.0
 
@@ -65,29 +64,52 @@ def monday_run_dates(since: str, until: str) -> list[str]:
     return out
 
 
-def week_args(run_date: str, config: str, out_dir: str) -> list[str]:
-    return [
+def week_args(run_date: str, config: str, out_dir: str, platforms: str | None = None) -> list[str]:
+    args = [
         "--config", config,
         "--out-dir", out_dir,
         "--run-date", run_date,
         "--window-days", str(WINDOW_DAYS),
     ]
+    if platforms:
+        args += ["--platforms", platforms]
+    return args
 
 
-def missing_env() -> list[str]:
-    return [name for name in REQUIRED_ENV if not (os.environ.get(name) or "").strip()]
+def _platforms_list(platforms: str | None) -> list[str] | None:
+    """Parse a comma-separated --platforms value, or None when unset."""
+    if not platforms:
+        return None
+    return [p.strip() for p in platforms.split(",") if p.strip()]
 
 
-def probe_targets() -> list[tuple[str, str, dict]]:
-    """(label, url, headers) for every external service a week depends on."""
+def missing_env(platforms: list[str] | None = None) -> list[str]:
+    """Env vars this run needs.
+
+    LLM_API_KEY is always required — every platform runs the LLM pipeline.
+    ENTREZ_EMAIL is only needed when pubmed is among the platforms.
+    """
+    required = []
+    if platforms is None or "pubmed" in platforms:
+        required.append("ENTREZ_EMAIL")
+    required.append("LLM_API_KEY")
+    return [name for name in required if not (os.environ.get(name) or "").strip()]
+
+
+def probe_targets(platforms: list[str] | None = None) -> list[tuple[str, str, dict]]:
+    """(label, url, headers) for the external services this run depends on."""
     llm_base = (os.environ.get("LLM_BASE_URL") or "").strip() or "https://api.openai.com/v1"
     llm_key = (os.environ.get("LLM_API_KEY") or "").strip()
-    return [
-        ("NCBI eutils", "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi", {}),
-        ("Europe PMC", "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC%3APPR&format=json&pageSize=1", {}),
-        ("arXiv", "https://export.arxiv.org/api/query?search_query=all:electron&max_results=1", {}),
-        ("LLM gateway", llm_base.rstrip("/") + "/models", {"Authorization": f"Bearer {llm_key}"}),
-    ]
+    targets: list[tuple[str, str, dict]] = []
+    if platforms is None or "pubmed" in platforms:
+        targets.append(("NCBI eutils", "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi", {}))
+    if platforms is None or "biorxiv" in platforms or "medrxiv" in platforms:
+        targets.append(("Europe PMC", "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=SRC%3APPR&format=json&pageSize=1", {}))
+    if platforms is None or "arxiv" in platforms:
+        targets.append(("arXiv", "https://export.arxiv.org/api/query?search_query=all:electron&max_results=1", {}))
+    # LLM gateway is probed for every run: all platforms go through the LLM pipeline.
+    targets.append(("LLM gateway", llm_base.rstrip("/") + "/models", {"Authorization": f"Bearer {llm_key}"}))
+    return targets
 
 
 def _check_target(target: tuple[str, str, dict], timeout: float) -> str | None:
@@ -108,13 +130,13 @@ def _check_target(target: tuple[str, str, dict], timeout: float) -> str | None:
     return None
 
 
-def preflight(timeout: float = PREFLIGHT_TIMEOUT) -> list[str]:
-    """Probe every service once and return a message per broken one.
+def preflight(platforms: list[str] | None = None, timeout: float = PREFLIGHT_TIMEOUT) -> list[str]:
+    """Probe each needed service once and return a message per broken one.
 
     Runs before the first week so a dead network — typically a fresh tmux pane
     that never inherited http_proxy from ~/.zshrc — costs seconds, not hours.
     """
-    targets = probe_targets()
+    targets = probe_targets(platforms)
     with ThreadPoolExecutor(max_workers=max(1, len(targets))) as pool:
         problems = list(pool.map(lambda t: _check_target(t, timeout), targets))
     for (label, _, _), problem in zip(targets, problems):
@@ -152,7 +174,7 @@ def retry_commands(weeks: list[str]) -> list[str]:
     return [f"{RETRY_CMD} --since {w} --until {w}" for w in weeks]
 
 
-def run_week(run_date: str, config: str, out_dir: str) -> tuple[int, str]:
+def run_week(run_date: str, config: str, out_dir: str, platforms: str | None = None) -> tuple[int, str]:
     """Run monitor.py for one week, returning (exit code, captured stderr).
 
     stderr is echoed back out as it arrives — a week takes minutes to hours and
@@ -160,7 +182,7 @@ def run_week(run_date: str, config: str, out_dir: str) -> tuple[int, str]:
     swallowed with capture_output.
     """
     proc = subprocess.Popen(
-        [sys.executable, MONITOR] + week_args(run_date, config, out_dir),
+        [sys.executable, MONITOR] + week_args(run_date, config, out_dir, platforms),
         stderr=subprocess.PIPE,
         text=True,
         bufsize=1,
@@ -179,6 +201,7 @@ def parse_args():
     p.add_argument("--until", required=True, help="Latest run-date (YYYY-MM-DD); snapped back to a Monday")
     p.add_argument("--config", default="config.yaml")
     p.add_argument("--out-dir", default=".")
+    p.add_argument("--platforms", default=None, help="Comma-separated platforms to backfill (default: all configured)")
     p.add_argument("--dry-run", action="store_true", help="Print the week plan and exit")
     return p.parse_args()
 
@@ -203,13 +226,15 @@ def main():
             print(f"  run-date {w}  ->  window {_window(w)}")
         return 0
 
-    missing = missing_env()
+    platform_list = _platforms_list(args.platforms)
+
+    missing = missing_env(platform_list)
     if missing:
         print(f"Missing env var(s): {', '.join(missing)}. Refusing to start.", file=sys.stderr)
         return 1
 
     print("Pre-flight:", flush=True)
-    unreachable = preflight()
+    unreachable = preflight(platform_list)
     if unreachable:
         print(f"\n{len(unreachable)} service(s) unreachable. Nothing was fetched.", file=sys.stderr)
         print("A fresh tmux pane usually lacks the proxy — check that http_proxy /", file=sys.stderr)
@@ -219,7 +244,7 @@ def main():
     problems: dict[str, list[str]] = {}
     for i, week in enumerate(weeks, 1):
         print(f"[{i}/{len(weeks)}] run-date {week}  window {_window(week)}", flush=True)
-        rc, stderr = run_week(week, args.config, args.out_dir)
+        rc, stderr = run_week(week, args.config, args.out_dir, args.platforms)
 
         reasons = []
         if rc != 0:

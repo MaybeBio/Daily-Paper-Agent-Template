@@ -73,6 +73,7 @@ def parse_args():
     p.add_argument("--run-date", default=None, help="Run date YYYY-MM-DD (default: today)")
     p.add_argument("--issue-body", default=None, help="Write issue markdown body to this path")
     p.add_argument("--issue-title", default=None, help="Write issue title (one line) to this path")
+    p.add_argument("--platforms", default=None, help="Comma-separated platforms to run (default: all in config)")
     return p.parse_args()
 
 
@@ -511,6 +512,9 @@ def main():
     start = (dt.date.fromisoformat(run_date) - dt.timedelta(days=window_days)).isoformat()
 
     platforms = [p for p in PLATFORMS if p in cfg.get("platforms", {})]
+    if args.platforms:
+        requested = [p.strip() for p in args.platforms.split(",") if p.strip()]
+        platforms = [p for p in platforms if p in requested]
     if not platforms:
         print("No platforms configured.", file=sys.stderr)
         sys.exit(1)
