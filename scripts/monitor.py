@@ -422,7 +422,12 @@ def run_agent_pipeline(row, cfg, out_dir, window=None):
 
 
 def run_agent_pipeline_all(rows, cfg, out_dir, window=None):
-    """Run the agent pipeline over all rows concurrently; return analyses dict.
+    """Run the agent pipeline over all rows concurrently.
+
+    Returns (analyses, failed): analyses maps (source, id) -> analysis dict for
+    papers whose LLM pipeline succeeded; failed lists "source/id" for those that
+    raised. A failed paper keeps its metadata JSON + fulltext.md but has no
+    analysis.json, so the caller must surface it — otherwise the gap is silent.
 
     The LLM calls are IO-bound (network waits), so a thread pool collapses
     wall-clock time from ~sum(per-paper) to ~max(per-paper) * (n / concurrency).
@@ -431,9 +436,10 @@ def run_agent_pipeline_all(rows, cfg, out_dir, window=None):
     None) and do not abort the batch.
     """
     analyses = {}
+    failed: list[str] = []
     llm_cfg = cfg.get("llm") or {}
     if not llm_cfg or not rows:
-        return analyses
+        return analyses, failed
     concurrency = max(1, int(llm_cfg.get("concurrency") or 8))
     print(f"[agent] running {len(rows)} papers with concurrency={concurrency}")
     with ThreadPoolExecutor(max_workers=concurrency) as ex:
@@ -448,8 +454,10 @@ def run_agent_pipeline_all(rows, cfg, out_dir, window=None):
                 analysis = None
             if analysis is not None:
                 analyses[(row["source"], row["id"])] = analysis
+            else:
+                failed.append(f"{row['source']}/{row['id']}")
             print(f"[agent] {done}/{len(rows)} {row['source']}/{row['id']}", flush=True)
-    return analyses
+    return analyses, failed
 
 
 def issue_title(start, end, total):
@@ -501,6 +509,15 @@ def platform_summary_line(kind, names):
     return f"Warning: {len(names)} platform(s) {kind}: {names}"
 
 
+def agent_summary_line(ids):
+    """Closing stderr line for papers whose LLM pipeline failed.
+
+    Mirrors platform_summary_line: backfill.py scrapes this line, so keep the
+    list a literal that ast.literal_eval can read back.
+    """
+    return f"Warning: {len(ids)} paper(s) agent-failed: {ids}"
+
+
 def main():
     args = parse_args()
     cfg = load_config(args.config)
@@ -541,7 +558,7 @@ def main():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
-    analyses = run_agent_pipeline_all(all_rows, cfg, args.out_dir, {"start": start, "end": end})
+    analyses, agent_failed = run_agent_pipeline_all(all_rows, cfg, args.out_dir, {"start": start, "end": end})
 
     csv_path, ids_path, n = write_discovery(args.out_dir, topic, run_date, all_rows)
     print(f"[total] {n} records -> {csv_path} + {ids_path}")
@@ -553,6 +570,9 @@ def main():
     if args.issue_title and total > 0:
         with open(args.issue_title, "w", encoding="utf-8") as f:
             f.write(issue_title(start, end, total) + "\n")
+
+    if agent_failed:
+        print(agent_summary_line(agent_failed), file=sys.stderr)
 
     if degraded:
         # Not an exit-non-zero condition: the run produced usable results, just

@@ -45,6 +45,11 @@ _PLATFORM_FAILURES = re.compile(r"Warning: \d+ platform\(s\) failed: (\[.*\])\s*
 # cannot do boolean groups, so the query degrades to a lossy superset.
 _PLATFORM_DEGRADED = re.compile(r"Warning: \d+ platform\(s\) degraded: (\[.*\])\s*$", re.MULTILINE)
 
+# One paper's LLM pipeline died (e.g. 429 rate limit): its metadata + fulltext
+# are archived but analysis.json never gets written. monitor.py exits 0, so this
+# line is the only trace that the week is missing LLM artifacts.
+_AGENT_FAILED = re.compile(r"Warning: \d+ paper\(s\) agent-failed: (\[.*\])\s*$", re.MULTILINE)
+
 
 def monday_run_dates(since: str, until: str) -> list[str]:
     """Every Monday in [since, until] as ISO dates.
@@ -169,6 +174,15 @@ def week_degradations(stderr: str) -> list[str]:
     return _summary_platforms(_PLATFORM_DEGRADED, stderr)
 
 
+def week_agent_failures(stderr: str) -> list[str]:
+    """"source/id" of papers whose LLM pipeline failed, from monitor.py's stderr.
+
+    These papers keep metadata + fulltext but lack analysis.json, so the week is
+    incomplete even though monitor.py exits 0.
+    """
+    return _summary_platforms(_AGENT_FAILED, stderr)
+
+
 def retry_commands(weeks: list[str]) -> list[str]:
     """One command per week, so retrying doesn't re-run the weeks in between."""
     return [f"{RETRY_CMD} --since {w} --until {w}" for w in weeks]
@@ -258,6 +272,9 @@ def main():
             degraded = week_degradations(stderr)
             if degraded:
                 reasons.append(f"degraded to Crossref-only: {', '.join(degraded)}")
+            agent_failed = week_agent_failures(stderr)
+            if agent_failed:
+                reasons.append(f"LLM failed for {len(agent_failed)} paper(s): {', '.join(agent_failed)}")
 
         if reasons:
             problems[week] = reasons

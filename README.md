@@ -152,6 +152,13 @@ source, id, doi, title, authors, journal, published_date, url, abstract
 
 LLM 调用以网关 IO 等待为主，用线程池并发（`llm.concurrency`，默认 8）把墙钟时间从「每篇耗时之和」压到约「每篇耗时 × (篇数 / 并发)」，避免顺序跑 80+ 篇超出 GitHub Actions 单 job 6 小时上限。单篇失败只跳过该篇、不中断整批。
 
+> **并发上限（SJTU 网关限流）：** 若你的 LLM 网关对单个 API key 有请求速率限制（例如 SJTU 网关约 **10 次/窗口**），`concurrency` 要**明显低于**该限制——因为 `concurrency` 是「同时跑的论文数」，而每篇论文会**串行**调用 LLM 2~4 次（评分 + 翻译 + 高分时的卡片 + 评审），失败还会重试，所以并发 10 篇的实际请求量是 20~40 次，照样打爆「10 次/窗口」的硬顶。收到大量 `429` 时，两类要分清：
+>
+> - `Rate limit exceeded for api_key ... Current limit: 10, Remaining: 0` —— key 级请求限速；
+> - `No deployments available for selected model ... cooldown_list=[...]` —— 网关把模型标进冷却，暂时无可用实例。
+>
+> 这两种都会让该篇 `[agent] ... FAILED`、`analysis.json` 不落盘（只剩元数据 + 全文），即静默缺 score/翻译/卡片/评审。`backfill.py` 会读取 monitor 打出的 `Warning: N paper(s) agent-failed: [...]` 汇总行，把该周标为需重跑。默认 `concurrency: 8` 即为此而设（低于 10、留出重试与峰值余量）——**不要盲目调大**，出现 429 时反而应继续调低。
+
 ---
 
 ## 🌐 静态站点与站内搜索
@@ -262,7 +269,7 @@ python scripts/backfill.py --since 2025-09-15 --until 2026-09-14 --platforms arx
 
 - **为什么按周**：`--since/--until` 之间每个周一拆成独立一次 `monitor.py` 运行（`--window-days 7`），避免多年窗口撞上 PubMed `retmax=500` / arXiv `max_results` 截断，也保证老论文按自身所在周归档。
 - **前置探活**：正式跑之前先并行探测 NCBI / Europe PMC / arXiv / LLM 网关，任一不通就拒绝开始（fresh tmux 里常漏代理，脚本会提示检查 `http_proxy` / `https_proxy`）。
-- **断点续跑**：某周崩溃或「平台缺失 / 降级」时脚本非零退出并列出该周，用打印出的重试命令只补那一周，不必整段重跑（重复某周会连同其 LLM 工作一并重跑）。
+- **断点续跑**：某周崩溃、平台缺失/降级、或某篇 LLM 调用失败（`agent-failed`）时，脚本非零退出并列出该周，用打印出的重试命令只补那一周，不必整段重跑（重复某周会连同其 LLM 工作一并重跑）。
 - **跑完手动部署 Pages**：回填只提交 `Archive/`，不提交 `site/`（已 gitignore）。跑完后重建站点并手动触发一次部署：
 
 ```bash

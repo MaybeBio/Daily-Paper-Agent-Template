@@ -154,6 +154,25 @@ def test_week_degradations_parses_monitors_own_summary_line():
     assert backfill.week_degradations(line + "\n") == ["biorxiv"]
 
 
+def test_week_agent_failures_reads_the_summary_line():
+    log = "Warning: 2 paper(s) agent-failed: ['arxiv/2512.23086v1', 'arxiv/2512.02864v1']\n"
+    assert backfill.week_agent_failures(log) == ["arxiv/2512.23086v1", "arxiv/2512.02864v1"]
+
+
+def test_week_agent_failures_empty_on_a_clean_run():
+    assert backfill.week_agent_failures("[agent] 1/1 arxiv/2512.23086v1\n") == []
+
+
+def test_week_agent_failures_parses_monitors_own_summary_line():
+    line = monitor.agent_summary_line(["arxiv/2512.23086v1"])
+    assert backfill.week_agent_failures(line + "\n") == ["arxiv/2512.23086v1"]
+
+
+def test_week_failures_ignores_an_agent_summary():
+    log = "Warning: 1 paper(s) agent-failed: ['arxiv/2512.23086v1']\n"
+    assert backfill.week_failures(log) == []
+
+
 def _labels(platforms=None):
     return [label for label, _, _ in backfill.probe_targets(platforms)]
 

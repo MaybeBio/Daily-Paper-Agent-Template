@@ -64,9 +64,10 @@ def test_run_agent_pipeline_all_collects_results(monkeypatch):
         return {"score": i, "id": row["id"]} if i % 2 == 0 else None
 
     monkeypatch.setattr(monitor, "run_agent_pipeline", fake_pipeline)
-    analyses = monitor.run_agent_pipeline_all(rows, cfg, "/tmp")
+    analyses, failed = monitor.run_agent_pipeline_all(rows, cfg, "/tmp")
 
     assert set(analyses) == {("pubmed", str(i)) for i in range(0, 12, 2)}
+    assert set(failed) == {f"pubmed/{i}" for i in range(1, 12, 2)}
     assert active["max"] > 1
 
 
@@ -78,8 +79,9 @@ def test_run_agent_pipeline_all_skips_when_llm_disabled(monkeypatch):
         return {"score": 1}
 
     monkeypatch.setattr(monitor, "run_agent_pipeline", fake_pipeline)
-    analyses = monitor.run_agent_pipeline_all([{"source": "pubmed", "id": "1"}], {}, "/tmp")
+    analyses, failed = monitor.run_agent_pipeline_all([{"source": "pubmed", "id": "1"}], {}, "/tmp")
     assert analyses == {}
+    assert failed == []
     assert calls == []
 
 

@@ -20,8 +20,11 @@ search_placeholder: 如 molecular dynamics、相分离、intrinsically disordere
 llm:
   enable_card: true
   enable_reviewer: true
-  # LLM 并发数（线程池大小）。顺序跑 80+ 篇 × 3 次调用会超过 GitHub Actions 6h 上限，
-  # 并发跑可把墙钟时间压到几十分钟。按网关 QPS 承受力调，默认 8。
+  # LLM 并发数（线程池大小）。顺序跑 80+ 篇 × 2~4 次调用会超过 GitHub Actions 6h 上限，
+  # 并发跑可把墙钟时间压到几十分钟。按网关限流承受力调：SJTU 网关对单个 API key
+  # 限 ~10 次/窗口，而每篇论文串行调用 LLM 2~4 次（评分/翻译/卡片/评审）+ 失败重试，
+  # 所以并发必须明显低于该上限（10 并发 ≈ 20~40 次请求，照样 429）。默认 8、
+  # 勿再往上调。若仍出现 [agent] ... FAILED，说明网关在冷却，需继续调低。
   concurrency: 8
   # 评分阈值：score >= min_score 才生成 Paper Card + Reviewer 报告；低于则只保留
   # 评分 + 一句话 + 摘要(翻译)。对应评分分档 0-4/5-7/8-10，5 为「部分命中」入口。
