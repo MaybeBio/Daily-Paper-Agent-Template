@@ -23,11 +23,12 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-import httpx
 import pandas as pd
+import requests
 import yaml
 
 from pyPaperFlow.preprint.arxiv_fetcher import ArxivFetcher
@@ -179,19 +180,31 @@ ARXIV_NS = {"o": "http://a9.com/-/spec/opensearch/1.1/"}
 
 
 def _arxiv_total_results(search_query):
-    """Return arXiv's totalResults for a built search_query (0 on error/empty)."""
-    try:
-        resp = httpx.get(
-            ARXIV_API,
-            params={"search_query": search_query, "start": 0, "max_results": 1},
-            timeout=30,
-        )
-        resp.raise_for_status()
-        root = ET.fromstring(resp.content)
-        el = root.find("o:totalResults", ARXIV_NS)
-        return int(el.text) if el is not None and el.text else 0
-    except Exception:
-        return 0
+    """Return arXiv's totalResults for a built search_query.
+
+    Raises on any API error (HTTP status, timeout, non-XML body) so an outage
+    surfaces as a platform failure instead of a silent empty week. A healthy
+    200 with no matches legitimately returns 0.
+    """
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            # requests (urllib3), not httpx: arXiv's Fastly CDN 406s httpx's TLS
+            # fingerprint on boolean queries.
+            resp = requests.get(
+                ARXIV_API,
+                params={"search_query": search_query, "start": 0, "max_results": 1},
+                timeout=30,
+            )
+            resp.raise_for_status()
+            root = ET.fromstring(resp.content)
+            el = root.find("o:totalResults", ARXIV_NS)
+            return int(el.text) if el is not None and el.text else 0
+        except Exception as exc:
+            last_error = exc
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+    raise last_error
 
 
 def fetch_platform(platform, cfg, start, end, root_dir):

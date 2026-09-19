@@ -1,4 +1,6 @@
 import httpx
+import pytest
+import requests
 
 import backfill
 import monitor
@@ -173,6 +175,26 @@ def test_check_target_accepts_a_404(monkeypatch):
 def test_check_target_flags_a_rejected_key(monkeypatch):
     monkeypatch.setattr(backfill.httpx, "get", lambda *a, **k: _FakeResponse(401))
     assert backfill._check_target(("LLM gateway", "http://x", {}), 1.0) == "LLM gateway: HTTP 401"
+
+
+def test_check_target_flags_a_406(monkeypatch):
+    # arXiv's export API returns 406 during outages; a reachable-but-refusing
+    # endpoint must not pass the preflight as healthy.
+    monkeypatch.setattr(backfill.httpx, "get", lambda *a, **k: _FakeResponse(406))
+    assert backfill._check_target(("arXiv", "http://x", {}), 1.0) == "arXiv: HTTP 406"
+
+
+def test_arxiv_total_results_raises_instead_of_swallowing(monkeypatch):
+    # A transport error must propagate (so arxiv is marked failed), not collapse
+    # into a silent 0-result week.
+    monkeypatch.setattr(monitor.time, "sleep", lambda s: None)
+
+    def boom(*a, **k):
+        raise requests.exceptions.ConnectionError("down")
+
+    monkeypatch.setattr(monitor.requests, "get", boom)
+    with pytest.raises(requests.exceptions.ConnectionError):
+        monitor._arxiv_total_results("all:electron")
 
 
 def test_check_target_reports_a_connection_error(monkeypatch):

@@ -95,14 +95,15 @@ def _check_target(target: tuple[str, str, dict], timeout: float) -> str | None:
 
     Any answer counts as reachable — a gateway may not expose /models at all, and
     a 404 still proves the connection and the proxy path work. Only a 5xx, a
-    rejected key, or no response at all means the run would be wasted.
+    rejected key, a 406 (the server refuses to serve — arXiv's export API returns
+    this during outages), or no response at all means the run would be wasted.
     """
     label, url, headers = target
     try:
         response = httpx.get(url, headers=headers, timeout=timeout, follow_redirects=True)
     except Exception as exc:
         return f"{label}: {type(exc).__name__}"
-    if response.status_code >= 500 or response.status_code in (401, 403):
+    if response.status_code >= 500 or response.status_code in (401, 403, 406):
         return f"{label}: HTTP {response.status_code}"
     return None
 
