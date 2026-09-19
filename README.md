@@ -226,6 +226,7 @@ python scripts/build_site.py \
 |---|---|
 | `--window-days 1` | 把窗口收窄到 1 天快速试跑，无需改 config |
 | `--run-date 2026-09-03` | 固定运行日，便于回测某周 |
+| `--platforms arxiv,pubmed` | 只跑逗号分隔列出的平台，跳过其余平台（默认跑 config 里全部已配置平台） |
 
 窗口默认不含运行当天；单平台失败仅告警，全部失败才非零退出。
 
@@ -242,6 +243,20 @@ python scripts/backfill.py --since 2025-09-15 --until 2026-09-14 --dry-run
 # 2) 正式回填
 python scripts/backfill.py --since 2025-09-15 --until 2026-09-14
 ```
+
+### 单平台重跑
+
+某平台因故漏抓时（例如 arXiv 曾因 API 拒绝请求而整段缺失），不必整段重跑所有平台，用 `--platforms` 只回补指定平台：
+
+```bash
+# 只重跑 arxiv，其余平台跳过；ENTREZ_EMAIL 不再必需
+python scripts/backfill.py --since 2025-09-15 --until 2026-09-14 --platforms arxiv
+```
+
+`--platforms` 为逗号分隔，透传给 `monitor.py` 的 `--platforms`。前置探活与 env 校验随平台联动：
+
+- **只跑 `arxiv`**：不再要求 `ENTREZ_EMAIL`（只有 LLM 网关的 `LLM_API_KEY` 仍必需）；pre-flight 只探测 arXiv 与 LLM 网关。
+- **只跑 `pubmed`**：仍需 `ENTREZ_EMAIL`，pre-flight 探测 NCBI eutils + LLM 网关。
 
 要点：
 
