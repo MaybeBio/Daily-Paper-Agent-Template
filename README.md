@@ -350,7 +350,7 @@ gh workflow run deploy_pages.yml --repo <owner>/<repo> --ref main
 
 高通量简略搜索效果：
 
-![alt text](image.png)
+![alt text](./figs/image6.png)
 
 ---
 
