@@ -352,6 +352,150 @@ gh workflow run deploy_pages.yml --repo <owner>/<repo> --ref main
 
 ![alt text](./figs/image6.png)
 
+
+---
+
+## 😆 RAG尝试
+
+> `文献 RAG 不替你读、不替你写，它把你私有语料里"归档的文本内容"变成"可问、可溯源到原文段落"的记忆——省掉的是检索与引用核对的摩擦，留下的是你自己的判断`
+
+此处我们使用[mcp-local-rag](https://github.com/shinpr/mcp-local-rag)来尝试对文献仓库进行RAG式QA，
+
+* 单篇文献：我们此处以预印本[Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments](https://pubmed.ncbi.nlm.nih.gov/42079037/)为例展示效果
+
+我们的问题是: `"What is the role of the disordered N-terminus of 4E-BP2? "`(4E-BP2 自身无序 N 端区域的功能)
+
+RAG返回的文本引用即为该问题的回答，见`下文每个条目的"text"`
+
+![alt text](./figs/image7.png)
+
+![alt text](./figs/image8.png)
+
+![alt text](./figs/image9.png)
+
+原始输出如下:
+
+```bash
+./node_modules/.bin/mcp-local-rag query "What is the role of the disordered N-terminus of 4E-BP2? "
+VectorStore initialized: /tmp/rag-t1/db
+Embedder: First use detected. Initializing model (downloading ~90MB, may take 1-2 minutes)...
+Embedder: Setting cache directory to "./models/"
+Embedder: Loading model "Xenova/all-MiniLM-L6-v2" on device "cpu"...
+Embedder: Model loaded successfully (device=cpu)
+[
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 16,
+    "text": "It demonstrates contacts between the C‐terminus of 4E‐BP2 and both binding sites on eIF4E from the crystal structure, corroborating previous observations of binding‐induced changes of this region of 4E‐BP2 (Smyth et al., 2022). The ensemble also showed significant intramolecular eIF4E contacts between a region of the N‐IDR that was reported to act as a 4E‐BP2 binding inhibitor and the canonical binding site (Abiko et al., 2007).",
+    "score": 0.23694531197987462,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 80,
+    "text": "This indicates that the secondary binding site of the 4E‐BP2 to eIF4E acts primarily in concert with the canonical binding site and that instances where only the secondary binding site is occupied are rare. Critically, it demonstrates that the crystal structure of the analogous 4E‐BP1:eIF4E complex presentation of Both at 100% is not representative of the ensemble present in solution, providing a clear basis for the accessibility of regulatory kinases within the context of the 3 nM complex. It also aligns with deletion studies that report that the canonical but not the secondary binding site can bind to eIF4E in isolation (Paku et al., 2012). The resulting ensemble also shows increased contacts between residues in the N‐IDR of eIF4E known to affect the binding of 4E‐BP2 and the canonical binding surface of 4E‐BP2.",
+    "score": 0.2580291783246409,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 49,
+    "text": "Figure 5a shows the assembly process of the 4E‐BP2:eIF4E conformational ensemble; starting from the crystal structure all residues that are not fixed in each specific instance are removed, then ensembles of the disordered loops or tails are screened with LDRS to select those consistent with the required geometry.",
+    "score": 0.2610657507110806,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 61,
+    "text": "Binding induces changes to the NMR intensity ratios, which decrease ~50%–60% at residues ~95–120, indicating that there are possible transient interactions with eIF4E (Lukhele et al., 2013). Electrostatics could explain the dynamic interaction mode of the C‐terminus of 4E‐BP2.",
+    "score": 0.2653705713278768,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 42,
+    "text": "This broadening is a signature of 4E‐BP2 conformational dynamics on the ~100 μs time scale that, remarkably, is not inhibited when it forms a complex with eIF4E, but consistent with a previous PET‐FCS study (Smyth et al., 2022). It is also interesting to note that segments  A  and  C , which do not overlap at all with known binding site residues, compact rather than expand in the complex with eIF4E, suggesting that binding favors a larger number of intramolecular 4E‐BP2 contacts compared to the free state.",
+    "score": 0.27343735052867923,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 0,
+    "text": "# Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments ## Abstract\n  Eukaryotic cap‐dependent translation initiation is regulated by binding of the predominantly folded eukaryotic initiation factor 4E (eIF4E) to the intrinsically disordered eIF4E binding proteins (4E‐BPs). Here, we report full‐length atomistic conformational ensembles generated by IDPConformerGenerator and optimized by X‐EISDv2 workflow for both apo 4E‐BP2, the neuronal 4E‐BP, and 4E‐BP2 in complex with eIF4E, using data from single‐molecule fluorescence and nuclear magnetic resonance (NMR), together with select coordinates from a 4E‐BP1:eIF4E crystal structure. Structural sampling within dynamic complexes is often underappreciated, with NMR and crystal structure data for 4E‐BP:eIF4E suggesting different degrees of structural heterogeneity. Our ensemble models validated by solution spectroscopy data enable comparison of free 4E‐BP2 and its complex with eIF4E. This shows a delocalization of contacts around canonical regions, which supports previous findings of unidirectional conditional occupancy of the binding sites. Two new contact regions emerged: one between the disordered N‐termini of eIF4E and 4E‐BP2, which may play an allosteric role in tuning the binding affinity, and the other between the C‐terminus of 4E‐BP2 and an extended region of eIF4E, which is consistent with the extended, dynamic binding interface that we reported previously. These results support a model of translation regulation in which the dynamic 4E‐BP2:eIF4E complex facilitates accessibility of regulatory sites of 4E‐BP2 when bound.",
+    "score": 0.2787180244922638,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 60,
+    "text": "Two new regions of intermolecular contact emerge: (RN1) contacts of the N‐IDR of eIF4E (residues 1–40) with the N‐terminus of 4E‐BP2 (residues 1–20), and (RN1) and sparse contacts between the C‐terminus of 4E‐BP2 (residues 110–120) and eIF4E, in particular residues 75–85 (Figure 6c,i). These enriched contacts are consistent with the binding‐induced changes at the C‐terminus of 4E‐BP2 measured by time‐resolved fluorescence spectroscopy, such as slower segmental dynamics and increased quenching dynamics (Smyth et al., 2022).",
+    "score": 0.3000167072069846,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 57,
+    "text": "As such, given the dynamic nature of the secondary binding site, the fraction of conformers where the secondary binding site is fixed to the crystal structure geometry is expected to be low, consistent with our optimized ensemble. ### Binding‐induced changes in the 4E‐BP2 ensemble\n  2D inter‐residue contact difference and normalized distance maps were constructed to compare the optimized ensembles of 4E‐BP2 in the bound and free states (Figure 6a). 4E‐BP2 when bound to eIF4E is expanded overall compared to the apo state, especially between residues 1–60 with 60–120 which reverses the contraction of these separations seen in Figure 3a. Topologically, more extended conformations of 4E‐BP2 that wrap around eIF4E enable it to interact with the extended binding interface on the surface of eIF4E (Lukhele et al., 2013). At the same time, there is compaction compared to the apo state observed for N‐ and C‐terminal stretches of ~20–30 residues. An increase in the number of intramolecular contacts within segments A and C in the bound state has been confirmed by contact map analysis (Table S4). Thus, the phospho‐regulatory 15RAIP18 motif is brought closer to the first two phosphorylation sites T37 and T46, potentially pre‐forming conformations that facilitate the initial phosphorylation steps.",
+    "score": 0.30860637301963434,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 54,
+    "text": "Interestingly, when all 4E‐BP2 residues in the crystal structure were fixed in the initial pool (Both), no subset of conformations that agreed with all restraints could be found (Smyth, 2024). In contrast, starting from the mixed pool containing Canonical, Secondary, and Both ensembles, subsets of conformations that satisfied all experimental restraints were found. This points to additional structural heterogeneity of the 4E‐BP2:eIF4E complex which is present in solution (Lukhele et al., 2013), but is not accurately represented in the crystal structure.",
+    "score": 0.3095265984739414,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  },
+  {
+    "filePath": "/tmp/rag-t1/src/fulltext.md",
+    "chunkIndex": 45,
+    "text": "To address this need, TIRF‐measured smFRET data were obtained on surface‐immobilized 4E‐BP2:eIF4E particles having a different fluorophore attached to each protein (Figure 4c). ### Generation and optimization of the eIF4E:4E‐BP2 ensemble\n  In recent years, an increasing number of IDP structural ensembles have been deposited in the Protein Ensemble Database (Ghafouri et al., 2024), although most of these entries are for proteins in their free, unbound states. Calculating ensembles of complexes of disordered proteins bound to their (folded) molecular targets remains a challenging prospect, inhibiting understanding of sequence‐ensemble‐function relation for IDPs (Hadži et al., 2021). To model the eIF4E‐bound state of 4E‐BP2, we made use of existing structural information from a high resolution crystal structure of the 4E‐BP1:eIF4E complex (PDB ID: 4UED) (Peter et al., 2015). This structure was used because it resolves both canonical and secondary binding sites and because 4E‐BP1 and 4E‐BP2 have the same eIF4E binding mechanism with high sequence identity for binding residues (Fletcher et al., 1998). The overall sequence identity of 4E‐BP1 and 4E‐BP2 is 57%; for the fragment of 4E‐BP1 observed in the crystal structure, the sequence identity is 85%. The crystal structure has coordinates for 4E‐BP1 residues 50–83 and most of the eIF4E residues, only lacking the N‐terminal disordered tail (residues 1–32). The initial conformation pool of the 4E‐BP2:eIF4E complex was built starting from the x‐ray crystal structure (PDB ID: 4UED) (Peter et al., 2015), see Figure 1b,c. Coordinates for residues of 4E‐BP2 and eIF4E that were not resolved in the crystal structure were generated with IDPConformerGenerator (Teixeira et al., 2022), using the local disordered region sampling (LDRS) tool (Liu et al., 2023).",
+    "score": 0.3098001675474414,
+    "fileTitle": "Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments",
+    "images": []
+  }
+]VectorStore connection closed
+
+```
+
+**`逐条判断`**
+1. chunk16（0.237）❌
+讲4E-BP2 C端 + eIF4E N-IDR抑制作用，**主体不是4E-BP2 N端**，干扰。
+2. chunk80（0.258）❌
+eIF4E的N-IDR和4E-BP2经典结合面的接触，是**eIF4E的无序区**，容易读错。
+3. chunk49（0.261）❌
+构象集合搭建流程，纯方法，无关生物学功能。
+4. chunk61（0.265）❌
+4E-BP2 C端动态相互作用，完全偏离N端。
+5. chunk42（0.273）⚠️ 背景辅助
+讲4E-BP2结合后整体构象动力学，A/C区段压缩；**不专门讲N端功能**，可以留作背景，不能用来直接回答问题。
+6. chunk0（0.279）✅ 核心摘要
+> one between the disordered N-termini of eIF4E and 4E-BP2, which may play an allosteric role in tuning the binding affinity
+关键点：4E-BP2 N端 ↔ eIF4E N端 形成分子间接触，**变构调节复合物亲和力**。
+7. chunk60（0.300）✅ 最强直接证据
+> (RN1) contacts of the N‐IDR of eIF4E (residues 1–40) with the N‐terminus of 4E‐BP2 (residues 1–20)
+精准定位：**4E-BP2 N端 1–20aa 与 eIF4E N-IDR（1–40aa）形成RN1互作区域**。这是原文专门定义的新接触区。
+8. chunk57（0.309）✅ 核心构象&调控功能
+4E-BP2残基1–60（包含N端无序区）结合eIF4E后发生重排；N端20–30残基发生压缩，把**磷酸调控基序 ¹⁵RAIP¹⁸拉近T37/T46磷酸位点**，预组织构象，方便激酶磷酸化修饰。
+9. chunk54（0.310）❌
+晶体结构与溶液构象异质性，不涉及N端功能。
+10.  chunk45（0.310）❌
+建模方法、PDB、IDPConformerGenerator，纯方法描述。
+
+**`筛选总结`**
+- ✅ **核心可用于回答的chunk：chunk0、chunk60、chunk57**（这三段联合就能完整回答query）
+- ⚠️ 可选背景：chunk42
+- ❌ 其余全部是干扰，直接丢弃，避免混淆eIF4E N-IDR和4E-BP2 N端
+
 ---
 
 <details>
