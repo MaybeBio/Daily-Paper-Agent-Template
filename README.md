@@ -27,6 +27,7 @@
   <a href="#-平台检索要点">平台检索要点</a> ·
   <a href="#-密钥与仓库配置">密钥与仓库配置</a> ·
   <a href="#-本地运行与调试">本地运行与调试</a> ·
+  <a href="#-真实案例一次-5-年全量回填">真实案例：5 年全量回填</a> ·
   <a href="#-每周阅读工作流">每周阅读工作流</a>
 </p>
 
@@ -282,6 +283,40 @@ git add Archive/ Discovery/ && git commit -m "backfill: capture <范围>" && git
 
 ---
 
+## 📊 真实案例：一次 5 年全量回填
+
+以本模板的 `idp-interaction-ai` 实例为例，从 `2021-01-01` 起按周回填（`backfill.py`），此后每周自动续跑，截至 2026-09 的真实规模：
+
+| 指标 | 实测值 |
+|---|---|
+| 归档论文 | **3087** 篇（`analysis.json` 计数） |
+| 覆盖周 | **299** 周（2021-01-03 .. 2026-09-20），单周最多约 30 篇 |
+| `Archive/` | **265 MB** / 14422 文件（只增） |
+| `site/` | **254 MB**（papers 139 MB + data 111 MB + weeks 4.5 MB），3389 个 HTML 页面 |
+| 最大单文件 | `site/data/search-deep.json` **89 MB** |
+| `build_site.py` 全量重建 | **约 48 s** |
+| `.git/` | 约 85 MB |
+
+**五年、3000 篇的量级，单仓库 + 单 Pages 站点完全扛得住**——距 GitHub Pages 站点 1 GB、单文件 100 MB 两条上限都还有余量（当前最大文件即 89 MB 的 `search-deep.json`，是全仓最需留意的一条）。
+
+**耗时与并发。** 回填**逐周串行**驱动 `monitor.py`：每周一次多平台检索 + 该周 LLM 流水线，周与周之间不并行，总时长 ≈ 周数 × 单周耗时。真正吃时间的是 LLM，检索本身占比很小；`llm.concurrency` 只在**同一周内**并行论文，不跨周。所以五年回填是一次以小时计的长跑，务必放进 `tmux` / `nohup`，并让 stderr 可见——`backfill.py` 逐周回显 monitor 的 stderr，中断后可用它打印的重试命令断点续跑。
+
+**回填后的 push。** 回填产物只有 `Archive/` 与 `Discovery/`（`site/` 已 gitignore），`git add Archive/ Discovery/ && git commit && git push` 即可。注意两点：单次提交 265 MB / 上万文件，GitHub 接受（无单文件超 100 MB），但体积不小；**git push 到 GitHub 常需代理**（`http_proxy` / `https_proxy`），这与「回填命中的 PubMed / arXiv / Europe PMC 直连即可、无需代理」并不矛盾——需要代理的是 GitHub 这一跳。
+
+**回填后的部署。** `deploy_pages.yml` 平时由 `monitor` 的 `workflow_run` 触发，而**手动回填的 push 不会触发它**（回填提交里没有 `site/` 变化，也就没有触发源），跑完必须手动触发一次：
+
+```bash
+gh workflow run deploy_pages.yml --repo <owner>/<repo> --ref main
+```
+
+部署 job 是**从 `Archive/` 重新构建站点**（并非复用回填时构建的产物），只做重新渲染、不重新抓取、不重跑 LLM，全量 3000 篇约 **1~3 分钟**，远低于 Actions 单 job 6 小时上限。
+
+> **`gh` 用 snap 安装时**：sandbox 里看不到仓库目录，在仓库内直接 `gh workflow run` 会报 `fatal: not a git repository (or any parent up to mount point /var/lib)`。加 `--repo owner/repo --ref main` 显式指定即可，与当前目录无关。
+
+**站点仍按历史周分类。** 回填论文按各自 `analysis.json` 的 `window_end` 落入**其自身所在周**（`site/weeks/<window_end>/`），与周更 cron 的周 key 完全一致；首页「本周推荐」只显示**最新一周**，历史各周在**归档页**按周翻阅，因此不会出现「首页一次推荐 3000 篇」（单周 ≤ 约 30 篇）。
+
+---
+
 ## 📚 每周阅读工作流
 
 1. 打开仓库 **Issues** 看当周推送报告，按平台与「评分 / 一句话」粗筛，点标题直达原文、点链接直达pages站点；
@@ -308,6 +343,14 @@ git add Archive/ Discovery/ && git commit -m "backfill: capture <范围>" && git
 ![alt text](figs/image4.png)
 
 > `文献WIKI积淀：仓库即WIKI理念，你可以畅所使用LLM WIKI/RAG技术来消化你的文献仓库！`
+
+历史文献回填，沉淀效果：
+
+![alt text](./figs/image5.png)
+
+高通量简略搜索效果：
+
+![alt text](image.png)
 
 ---
 
