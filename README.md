@@ -357,11 +357,41 @@ gh workflow run deploy_pages.yml --repo <owner>/<repo> --ref main
 
 ## 😆 RAG尝试
 
+> [!WARNING]
+> 
+> 具体效果取决于RAG实现技术与你私有语料的质量，以及接入的LLM模型能力
+>
+> 尽量整合使用: `成熟的RAG技术栈工具+优化你私有文献语料的质量(可只保留全英文原文)+接入能力强的LLM模型`，才能获得更好的效果
+
 > `文献 RAG 不替你读、不替你写，它把你私有语料里"归档的文本内容"变成"可问、可溯源到原文段落"的记忆——省掉的是检索与引用核对的摩擦，留下的是你自己的判断`
 
 此处我们使用[mcp-local-rag](https://github.com/shinpr/mcp-local-rag)来尝试对文献仓库进行RAG式QA，
 
-* 单篇文献：我们此处以预印本[Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments](https://pubmed.ncbi.nlm.nih.gov/42079037/)为例展示效果
+### **`1️⃣单篇文献：单篇index单篇query`**
+
+我们此处以预印本[Conformational ensembles of the disordered 4E‐BP2:eIF4E complex restrained by smFRET experiments](https://pubmed.ncbi.nlm.nih.gov/42079037/)为例展示效果
+
+```bash 
+ ./node_modules/.bin/mcp-local-rag ingest /tmp/rag-t1/src/
+Found 1 file(s) to ingest.
+VectorStore initialized: /tmp/rag-t1/db
+Parsed MD: /tmp/rag-t1/src/fulltext.md (58418 characters)
+Embedder: First use detected. Initializing model (downloading ~90MB, may take 1-2 minutes)...
+Embedder: Setting cache directory to "./models/"
+Embedder: Loading model "Xenova/all-MiniLM-L6-v2" on device "cpu"...
+Embedder: Model loaded successfully (device=cpu)
+VectorStore: Skipping deletion as table does not exist
+VectorStore: Created table "chunks"
+VectorStore: FTS index "fts_index_v2" created successfully
+VectorStore: Inserted 135 chunks
+[1/1] /tmp/rag-t1/src/fulltext.md ... OK (135 chunks)
+VectorStore connection closed
+
+--- Ingest Summary ---
+Succeeded: 1
+Failed:    0
+Total chunks: 135
+```
 
 我们的问题是: `"What is the role of the disordered N-terminus of 4E-BP2? "`(4E-BP2 自身无序 N 端区域的功能)
 
@@ -470,31 +500,37 @@ Embedder: Model loaded successfully (device=cpu)
 **`逐条判断`**
 1. chunk16（0.237）❌
 讲4E-BP2 C端 + eIF4E N-IDR抑制作用，**主体不是4E-BP2 N端**，干扰。
-2. chunk80（0.258）❌
+1. chunk80（0.258）❌
 eIF4E的N-IDR和4E-BP2经典结合面的接触，是**eIF4E的无序区**，容易读错。
-3. chunk49（0.261）❌
+1. chunk49（0.261）❌
 构象集合搭建流程，纯方法，无关生物学功能。
-4. chunk61（0.265）❌
+1. chunk61（0.265）❌
 4E-BP2 C端动态相互作用，完全偏离N端。
-5. chunk42（0.273）⚠️ 背景辅助
+1. chunk42（0.273）⚠️ 背景辅助
 讲4E-BP2结合后整体构象动力学，A/C区段压缩；**不专门讲N端功能**，可以留作背景，不能用来直接回答问题。
-6. chunk0（0.279）✅ 核心摘要
+1. chunk0（0.279）✅ 核心摘要
 > one between the disordered N-termini of eIF4E and 4E-BP2, which may play an allosteric role in tuning the binding affinity
 关键点：4E-BP2 N端 ↔ eIF4E N端 形成分子间接触，**变构调节复合物亲和力**。
-7. chunk60（0.300）✅ 最强直接证据
+1. chunk60（0.300）✅ 最强直接证据
 > (RN1) contacts of the N‐IDR of eIF4E (residues 1–40) with the N‐terminus of 4E‐BP2 (residues 1–20)
 精准定位：**4E-BP2 N端 1–20aa 与 eIF4E N-IDR（1–40aa）形成RN1互作区域**。这是原文专门定义的新接触区。
-8. chunk57（0.309）✅ 核心构象&调控功能
+1. chunk57（0.309）✅ 核心构象&调控功能
 4E-BP2残基1–60（包含N端无序区）结合eIF4E后发生重排；N端20–30残基发生压缩，把**磷酸调控基序 ¹⁵RAIP¹⁸拉近T37/T46磷酸位点**，预组织构象，方便激酶磷酸化修饰。
-9. chunk54（0.310）❌
+1. chunk54（0.310）❌
 晶体结构与溶液构象异质性，不涉及N端功能。
-10.  chunk45（0.310）❌
+1.   chunk45（0.310）❌
 建模方法、PDB、IDPConformerGenerator，纯方法描述。
 
 **`筛选总结`**
 - ✅ **核心可用于回答的chunk：chunk0、chunk60、chunk57**（这三段联合就能完整回答query）
 - ⚠️ 可选背景：chunk42
 - ❌ 其余全部是干扰，直接丢弃，避免混淆eIF4E N-IDR和4E-BP2 N端
+
+---
+
+### **`2️⃣多篇文献：批量index批量query（对应我们模板爬取需求）`**
+
+具体细节见 [RAG-test-demo](/Demo/RAG_test.md) 
 
 ---
 
