@@ -10,6 +10,10 @@
 </p>
 
 <p align="center">
+  <img src="figs/demo-e2e.gif" width="100%" alt="端到端演示：仓库主页 → Issue 周报（文献推送表）→ 点开最后一列进入渲染网页 → 单篇 AI 全文精读（Paper Card + 审稿人评审）">
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/pyPaperFlow-powered-7C3AED?style=for-the-badge" alt="pyPaperFlow powered">
   <img src="https://img.shields.io/badge/platforms-PubMed%C2%B7arXiv%C2%B7bioRxiv%C2%B7medRxiv%C2%B7chemRxiv-0EA5E9?style=for-the-badge" alt="Supported platforms">
   <img src="https://img.shields.io/badge/schedule-weekly%C2%B7GitHub%20Actions-0D9488?style=for-the-badge" alt="Weekly via GitHub Actions">
@@ -165,6 +169,8 @@ LLM 调用以网关 IO 等待为主，用线程池并发（`llm.concurrency`，�
 ## 🌐 静态站点与站内搜索
 
 `build_site.py` 遍历 `Archive/` 渲染出无后端静态站点，由 `deploy_pages.yml` 在 monitor 成功后自动部署到 GitHub Pages。页面包括：**本周推荐**（按评分排序）、**按年/周归档**、**全文搜索**、**单篇解析页**。
+
+![站点演示：首页本周推荐 → 滚动文献卡片 → 按周归档 → 全文搜索（命中高亮）](./figs/site-preview.gif)
 
 **站内搜索（两段式索引）**：站点无后端，搜索完全在浏览器端完成，索引在导出阶段预生成：
 
